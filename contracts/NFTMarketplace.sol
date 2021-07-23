@@ -23,11 +23,11 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 	
 	//Structures
 	struct Asset{
-	
+		
 	}
 
 	struct Order{
-	
+		
 	}
 
 	// Marketplace Lifecycle
