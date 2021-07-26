@@ -72,10 +72,10 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 		);
 	}
 
-	modifier onlyProductOwner(bytes32 assetId) {
-        (,,,,,address _owner,,) = getProduct(assetId);
+	modifier onlyAssetOwner(bytes32 assetId) {
+        (,,,,,address _owner,,) = getAsset(assetId);
         require(_owner != address(0), "error_notFound");
-        require(_owner == msg.sender || owner == msg.sender, "error_productOwnersOnly");
+        require(_owner == msg.sender || owner == msg.sender, "error_assetOwnersOnly");
         _;
     }
 
@@ -95,8 +95,8 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 		return true;
 	}
 
-	function createAsset(){
-		
+	function createAsset(bytes32 assetId, uint tokenId, address contract, uint numSales, uint royalties, address owner, address creator) public {
+		_createAsset(assetId, tokenId, contract, numSales, royalties, owner, creator);
 	}
 
 	function _createAsset(bytes32 assetId, uint tokenId, address contract, uint numSales, uint royalties, address owner, address creator) internal {
@@ -108,8 +108,8 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 		emit AssetCreated(msg.sender, id, name, contract, tokenId);
 	}
 
-	function updateAsset(){
-	
+	function updateAsset() public onlyAssetOwner(assetId){
+		
 	}
 
 	//two step asset transfer method
