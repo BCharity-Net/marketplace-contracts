@@ -19,18 +19,19 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 	using SafeMath for int256
 
 	//events
-	event AssetImported(address indexed owner, bytes32 id, address indexed contract, uint indexed tokenId, string name, uint numSales, uint royalties, address creator);
-	event AssetCreated(address indexed msg.sender, bytes32 id, string name, address indexed contract, uint indexed tokenId)
+	event AssetImported(address indexed owner, bytes32 id, address indexed contract, uint256 indexed tokenId, string name, uint256 numSales, uint256 royalties, address creator);
+	event AssetCreated(address indexed msg.sender, bytes32 id, string name, address indexed contract, uint256 indexed tokenId)
 
 	//Structures
 	struct Asset{
 		bytes32 id;
-		uint tokenId;
+		uint256 tokenId;
 		address contract;
-		uint numSales;
-		uint royalties;
+		uint256 numSales;
+		uint256 royalties;
 		address owner;
 		address creator;
+		address recipient;
 		mapping(address => Order) orders;
 	}
 
@@ -52,7 +53,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 
 	/// Asset management
 
-	function getAsset(bytes32 id) public override view returns (uint tokenId, address contract, uint numSales, uint royalties, address owner, address creator) {
+	function getAsset(bytes32 id) public override view returns (uint256 tokenId, address contract, uint256 numSales, uint256 royalties, address owner, address creator) {
 		(tokenId, contract, numSales, royalties, owner, creator) = _getAssetLocal(id);
 		if (owner != address(0))
 			return (token_id, contract, numSales, royalties, owner, creator);
@@ -60,7 +61,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 		return (token_id, contract, numSales, royalties, owner, creator);
 	}
 
-	function getAssetLocal(bytes32 id) internal view returns (uint tokenId, address contract, uint numSales, uint royalties, address owner, address creator) {
+	function getAssetLocal(bytes32 id) internal view returns (uint256 tokenId, address contract, uint256 numSales, uint256 royalties, address owner, address creator) {
 		Asset memory a = assets[id];
 		return (
 			a.tokenId, 
@@ -82,7 +83,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 	function _importAssetIfNeeded(bytes32 assetId) internal returns(bool imported){
 		Asset storage a = assets[assetId];
 		if (a.id != 0x0) {return false;}
-		(_tokenId, _contract, _numSales, _royalties, _owner, _creator) = prev_marketplace.getAsset(assetId);
+		(uint256 _tokenId, address _contract, uint256 _numSales, uint256 _royalties, address _owner, address _creator) = prev_marketplace.getAsset(assetId);
 		if (_owner == address(0)) {return false;}
 		a.id = assetId;
 		a.tokenId = _tokenId; 
@@ -95,35 +96,57 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 		return true;
 	}
 
-	function createAsset(bytes32 assetId, uint tokenId, address contract, uint numSales, uint royalties, address owner, address creator) public {
+	function createAsset(bytes32 assetId, uint256 tokenId, address contract, uint256 numSales, uint256 royalties, address owner, address creator) public {
 		_createAsset(assetId, tokenId, contract, numSales, royalties, owner, creator);
 	}
 
-	function _createAsset(bytes32 assetId, uint tokenId, address contract, uint numSales, uint royalties, address owner, address creator) internal {
+	function _createAsset(bytes32 assetId, uint256 tokenId, address contract, uint256 numSales, uint256 royalties, address owner, address creator) internal {
 		require(tokenId != 0, "error_nullTokenId");
 		require(contract != address(0), "error_nullContract");
 		(,,,,,address _owner,,) = getProduct(assetId);
 		require(_owner == address(0), "error_alreadyExists");
-		assets[assetId] = Asset({id: assetId, tokenId: tokenId, contract: contract, numSales:numSales, royalties: royalties, owner: owner, creator: msg.sender});
+		assets[assetId] = Asset({id: assetId, tokenId: tokenId, contract: contract, numSales:numSales, royalties: royalties, owner: owner, creator: creator});
 		emit AssetCreated(msg.sender, id, name, contract, tokenId);
 	}
 
-	function updateAsset() public onlyAssetOwner(assetId){
-		
+	function updateAsset((bytes32 assetId, uint256 tokenId, address contract, uint256 numSales, uint256 royalties, address owner, address creator) public onlyAssetOwner(assetId){
+		_importAssetIfNeeded(assetId);
+		Asset storage a = assets[assetId];
+		a.id = assetId;
+		a.tokenId = tokenId; 
+		a.contract = contract; 
+		a.numSales = numSales; 
+		a.royalties =royalties;
+		a.owner = owner;
+		a.creator = creator;
+		//finish filling out this field + implement event
+		emit AssetUpdated(a.tokenId, a.contract, a.owner);
 	}
 
 	//two step asset transfer method
-	function offerAsset(){
-	
+	function offerAsset(bytes32 assetId, address recipient) public onlyAssetOwner(assetId){
+		_importAssetifNeeded(assetId);
+		assets[assetId].recipient = recipient;
+		//finish filling out this field + implement event
+		emit AssetOwnershipOffered()
 	}
 
-	function claimAsset(){
-	
+	function claimAsset(bytes32 assetId) public {
+		_importAssetIfNeeded(assetId);
+        Asset storage a = assets[assetId];
+        require(msg.sender == a.newOwnerCandidate, "error_notPermitted");
+        //Implement event
+		emit AssetOwnershipChanged(msg.sender, assetId, a.owner);
+        a.owner = msg.sender;
+        a.newOwnerCandidate = address(0);
 	}
 
 	//one step asset transfer method
-	function transferAsset(){
-	
+	function transferAsset(bytes32 assetId, address recipient) public onlyAssetOwner(assetId){
+		_importAssetifNeeded(assetId);
+		Asset storage a = assets[assetId];
+        a.owner = recipient;
+        a.newOwnerCandidate = address(0);
 	}
 
 	//Whitelist mangement, if necessary?  
