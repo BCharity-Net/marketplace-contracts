@@ -16,15 +16,18 @@ interface IGIVEMarketplace{
  */
 
 contract GIVEMarketplace is Ownable, IGIVEMarketplace{
-	using SafeMath for int256;
 
-
+	using SafeMath for uint256;
+	
+	//events (must be defined before structs for some reason...)
+	event AssetImported(address indexed owner, bytes32 id, address indexed contractAddress, uint indexed tokenId, string name, uint numSales, uint royalties, address creator);
+	event AssetCreated(address indexed owner, bytes32 id, string name, address indexed contractAddress, uint indexed tokenId);
+	
 	//Structures
-
 	struct Asset{
 		bytes32 id;
 		uint tokenId;
-		address contract;
+		address contractAddress;
 		uint numSales;
 		uint royalties;
 		address owner;
@@ -36,20 +39,15 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 
 		Asset asset;
 		address fromAddress;
-		address toAddress;
+		address toAddress; //from and to indicate the direction the asset is 'travelling'
 		uint orderType; // 1 for sellOrder or 2 for buyOrder
 		uint subPrice; //likely in units of finney (0.001 ETH)
-		uint royalties; //9% of price. however, solidity DOES NOT support decimal/fractional values.
-		uint price; //subPrice + royalties
+		uint price; //subPrice + 9% royalties
 		
 		//expirationTime?
 		//auctions?
 
-	using SafeMath for int256;
-
-	//events
-	event AssetImported(address indexed owner, bytes32 id, address indexed contract, uint indexed tokenId, string name, uint numSales, uint royalties, address creator);
-	event AssetCreated(address indexed msg.sender, bytes32 id, string name, address indexed contract, uint indexed tokenId)
+	}
 
 	// Marketplace Lifecycle
 
@@ -65,19 +63,19 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 
 	/// Asset management
 
-	function getAsset(bytes32 id) public override view returns (uint tokenId, address contract, uint numSales, uint royalties, address owner, address creator) {
-		(tokenId, contract, numSales, royalties, owner, creator) = _getAssetLocal(id);
+	function getAsset(bytes32 id) public override view returns (uint tokenId, address contractAddress, uint numSales, uint royalties, address owner, address creator) {
+		(tokenId, contractAddress, numSales, royalties, owner, creator) = _getAssetLocal(id);
 		if (owner != address(0))
-			return (token_id, contract, numSales, royalties, owner, creator);
-		(tokenId, contract, numSales, royalties, owner, creator) = prev_marketplace.getAsset(id);
-		return (token_id, contract, numSales, royalties, owner, creator);
+			return (token_id, contractAddress, numSales, royalties, owner, creator);
+		(tokenId, contractAddress, numSales, royalties, owner, creator) = prev_marketplace.getAsset(id);
+		return (token_id, contractAddress, numSales, royalties, owner, creator);
 	}
 
-	function getAssetLocal(bytes32 id) internal view returns (uint tokenId, address contract, uint numSales, uint royalties, address owner, address creator) {
+	function _getAssetLocal(bytes32 id) internal view returns (uint tokenId, address contractAddress, uint numSales, uint royalties, address owner, address creator) {
 		Asset memory a = assets[id];
 		return (
 			a.tokenId, 
-			a.contract, 
+			a.contractAddress, 
 			a.numSales, 
 			a.royalties,
 			a.owner, 
@@ -99,43 +97,43 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 		if (_owner == address(0)) {return false;}
 		a.id = assetId;
 		a.tokenId = _tokenId; 
-		a.contract = _contract; 
+		a.contractAddress = _contractAddress; 
 		a.numSales = _numSales; 
 		a.royalties = _royalties;
 		a.owner = _owner;
 		a.creator = _creator;
-		emit AssetImported(a.owner, a.id, a.contract, a.tokenId, a.name, a.numSales, a.royalties, a.creator);
+		emit AssetImported(a.owner, a.id, a.contractAddress, a.tokenId, a.name, a.numSales, a.royalties, a.creator);
 		return true;
 	}
 
-	function createAsset(bytes32 assetId, uint tokenId, address contract, uint numSales, uint royalties, address owner, address creator) public {
-		_createAsset(assetId, tokenId, contract, numSales, royalties, owner, creator);
+	function createAsset(bytes32 assetId, uint tokenId, address contractAddress, uint numSales, uint royalties, address owner, address creator) public {
+		_createAsset(assetId, tokenId, contractAddress, numSales, royalties, owner, creator);
 	}
 
-	function _createAsset(bytes32 assetId, uint tokenId, address contract, uint numSales, uint royalties, address owner, address creator) internal {
+	function _createAsset(bytes32 assetId, uint tokenId, address contractAddress, uint numSales, uint royalties, address owner, address creator) internal {
 		require(tokenId != 0, "error_nullTokenId");
-		require(contract != address(0), "error_nullContract");
+		require(contractAddress != address(0), "error_nullContract");
 		(,,,,,address _owner,,) = getProduct(assetId);
 		require(_owner == address(0), "error_alreadyExists");
-		assets[assetId] = Asset({id: assetId, tokenId: tokenId, contract: contract, numSales:numSales, royalties: royalties, owner: owner, creator: msg.sender});
-		emit AssetCreated(msg.sender, id, name, contract, tokenId);
+		assets[assetId] = Asset({id: assetId, tokenId: tokenId, contractAddress: contractAddress, numSales:numSales, royalties: royalties, owner: owner, creator: msg.sender});
+		emit AssetCreated(msg.sender, id, name, contractAddress, tokenId);
 	}
 
-	function updateAsset() public onlyAssetOwner(assetId){
+	function updateAsset(bytes32 assetId) public onlyAssetOwner(assetId){
 		
 	}
 
 	//two step asset transfer method
-	function offerAsset(){
+	function offerAsset() public {
 	
 	}
 
-	function claimAsset(){
+	function claimAsset() public {
 	
 	}
 
 	//one step asset transfer method
-	function transferAsset(){
+	function transferAsset() public {
 	
 	}
 
@@ -146,35 +144,60 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 	mapping (uint => Order) public sellOrder; //uint will be the tokenId. probably only going to have one sellOrder at a time?
 	mapping (uint => Order[]) public buyOrders; //array of Orders to represent buy orders on an asset
 
-	function getSellOrders(bytes32 assetId){
-
-		return sellOrder[assetId]; //returns a sell order of a specific asset
-		
+	function getSellOrder(uint tokenId) public {
+		return sellOrder[tokenId]; //returns a sell order of a specific asset
 	}
 
-	function getBuyOrders(bytes32 assetId){
-
-		return buyOrders[assetId]; //returns array of buy orders on a specific asset
+	function getBuyOrders(uint tokenId) public {
+		return buyOrders[tokenId]; //returns array of buy orders on a specific asset
 	}
 
-	function getOrderLocal(){
+	function getBuyOrder(uint tokenId, address toAddress) public { //retrieves a buy order that you made
+
+
+	}
+
+	function getOrderLocal() public { //what is a local order?
 	
 	}
 
-	function _importOrderIfNeeded(){
-	
+	function _importOrderIfNeeded() internal {
+
 	}
 
-	function createOrder(Asset asset, address fromAddress, address toAddress, uint orderType, uint subPrice){
+	function createOrder(Asset asset, address fromAddress, address toAddress, uint orderType, uint subPrice) public {
 		
+		if (orderType == 1){ //if sellOrder
+			sellOrder[asset.tokenId] = Order(asset, fromAddress, toAddress, orderType, subPrice, subPrice * 109 / 100);
+		}
+		else if (orderType == 2){ //if buyOrder
+			buyOrders[asset.tokenId].push(Order(asset, fromAddress, toAddress, orderType, subPrice, subPrice * 109 / 100));
+		}
 		
 	}
 
-	function cancelOrder(){
-	
+	function cancelOrder(Order order, address toAddress) public {
+
+		if (order.orderType == 1){
+			delete sellOrder[order.asset.tokenId];
+		}
+		else if (order.orderType == 2){
+			for (uint i=0; i < buyOrders[order.asset.tokenId].length; i++){
+				if (buyOrders[order.asset.tokenId][i].toAddress == toAddress){ 
+				//buyOrders[order.asset.tokenId][i].toAddress retrieves buyOrder array,
+				//then iterates through the array with i, and compares the passed toAddress(presumably the user's address)
+				//with the address that created the order.
+					delete buyOrders[order.asset.tokenId][i].toAddress;
+
+				}
+
+			}
+
+		}
+		//TODO delete leaves empty spot; move last element into empty spot.
 	}
 
-	function fulfillOrder(){
+	function fulfillOrder() public {
 	
 	}
 	
