@@ -23,7 +23,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 	
 	//Structures
 	struct Asset{
-	
+
 	}
 
 	struct Order{
@@ -31,7 +31,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 		Asset asset;
 		address fromAddress;
 		address toAddress;
-		string orderType; // "sellOrder" or "buyOrder"
+		uint orderType; // 1 for sellOrder or 2 for buyOrder
 		uint subPrice; //likely in units of finney (0.001 ETH)
 		uint royalties; //9% of price. however, solidity DOES NOT support decimal/fractional values.
 		uint price; //subPrice + royalties
@@ -96,8 +96,18 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 
 	// Order management
 
-	function getOrder(){
+	mapping (uint => Order) public sellOrder; //uint will be the tokenId. probably only going to have one sellOrder at a time?
+	mapping (uint => Order[]) public buyOrders; //array of Orders to represent buy orders on an asset
+
+	function getSellOrders(bytes32 assetId){
+
+		return sellOrder[assetId]; //returns a sell order of a specific asset
 		
+	}
+
+	function getBuyOrders(bytes32 assetId){
+
+		return buyOrders[assetId]; //returns array of buy orders on a specific asset
 	}
 
 	function getOrderLocal(){
@@ -108,11 +118,13 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 	
 	}
 
-	function createOrder(){
+	function createOrder(Asset asset, address fromAddress, address toAddress, uint orderType, uint subPrice){
+		
+		
 		
 	}
 
-	function cancelOrder (){
+	function cancelOrder(){
 	
 	}
 
