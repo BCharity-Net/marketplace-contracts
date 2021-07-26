@@ -7,3 +7,7 @@ node_modules
 .idea/dictionaries
 .idea/httpRequests
 coverage
+.vs/slnx.sqlite
+.vs/ProjectSettings.json
+.vs/VSWorkspaceState.json
+.vs/marketplace-contracts/v16/.suo
