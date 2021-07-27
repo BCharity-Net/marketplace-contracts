@@ -40,7 +40,17 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	}
 
 	struct Order{
+
+		Asset asset;
+		address fromAddress;
+		address toAddress;
+		string orderType; // "sellOrder" or "buyOrder"
+		uint subPrice; //likely in units of finney (0.001 ETH)
+		uint royalties; //9% of price. however, solidity DOES NOT support decimal/fractional values.
+		uint price; //subPrice + royalties
 		
+		//expirationTime?
+		//auctions?
 	}
 
 	// Marketplace Lifecycle
