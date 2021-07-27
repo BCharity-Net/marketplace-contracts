@@ -9,5 +9,9 @@ node_modules
 coverage
 .vs/slnx.sqlite
 .vs/ProjectSettings.json
-.vs/marketplace-contracts/v16/.suo
 .vs/VSWorkspaceState.json
+.vs/marketplace-contracts/v16/.suo
+.vscode/settings.json
+.vscode/settings.json
+package-lock.json
+.vscode/launch.json
