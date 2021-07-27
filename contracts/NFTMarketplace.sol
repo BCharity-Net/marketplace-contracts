@@ -22,6 +22,9 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	//events
 	event AssetImported(address indexed owner, bytes32 id, address indexed nftContract, uint256 indexed tokenId, string name, uint256 numSales, uint256 royalties, address creator);
 	event AssetCreated(address indexed creator, bytes32 id, string name, address indexed nftContract, uint256 indexed tokenId);
+	event AssetOwnershipOffered(bytes32 id, address indexed owner, address indexed recipient);
+	event AssetOwnershipChanged(address indexed newOwner, assetId, address indexed owner);
+	event AssetUpdated(uint256 indexed tokenId, address indexed nftContract, address indexed owner);
 
 	//Structures
 	struct Asset{
@@ -141,8 +144,9 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	function offerAsset(bytes32 assetId, address recipient) public onlyAssetOwner(assetId){
 		_importAssetIfNeeded(assetId);
 		assets[assetId].recipient = recipient;
+		owner = assets[assetId].owner;
 		//finish filling out this field + implement event
-		emit AssetOwnershipOffered();
+		emit AssetOwnershipOffered(assetId, owner, recipient);
 	}
 
 	function claimAsset(bytes32 assetId) public {
