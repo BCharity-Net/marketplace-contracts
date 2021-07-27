@@ -66,16 +66,16 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 	function getAsset(bytes32 id) public override view returns (uint256 tokenId, address contract, uint256 numSales, uint256 royalties, address owner, address creator) {
 		(tokenId, contract, numSales, royalties, owner, creator) = _getAssetLocal(id);
 		if (owner != address(0))
-			return (token_id, contractAddress, numSales, royalties, owner, creator);
-		(tokenId, contractAddress, numSales, royalties, owner, creator) = prev_marketplace.getAsset(id);
-		return (token_id, contractAddress, numSales, royalties, owner, creator);
+			return (token_id, contract, numSales, royalties, owner, creator);
+		(tokenId, contract, numSales, royalties, owner, creator) = prev_marketplace.getAsset(id);
+		return (token_id, contract, numSales, royalties, owner, creator);
 	}
 
 	function getAssetLocal(bytes32 id) internal view returns (uint256 tokenId, address contract, uint256 numSales, uint256 royalties, address owner, address creator) {
 		Asset memory a = assets[id];
 		return (
 			a.tokenId, 
-			a.contractAddress, 
+			a.contract, 
 			a.numSales, 
 			a.royalties,
 			a.owner, 
@@ -97,12 +97,12 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 		if (_owner == address(0)) {return false;}
 		a.id = assetId;
 		a.tokenId = _tokenId; 
-		a.contractAddress = _contractAddress; 
+		a.contract = contract; 
 		a.numSales = _numSales; 
 		a.royalties = _royalties;
 		a.owner = _owner;
 		a.creator = _creator;
-		emit AssetImported(a.owner, a.id, a.contractAddress, a.tokenId, a.name, a.numSales, a.royalties, a.creator);
+		emit AssetImported(a.owner, a.id, a.contract, a.tokenId, a.name, a.numSales, a.royalties, a.creator);
 		return true;
 	}
 
@@ -112,7 +112,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace{
 
 	function _createAsset(bytes32 assetId, uint256 tokenId, address contract, uint256 numSales, uint256 royalties, address owner, address creator) internal {
 		require(tokenId != 0, "error_nullTokenId");
-		require(contractAddress != address(0), "error_nullContract");
+		require(contract != address(0), "error_nullContract");
 		(,,,,,address _owner,,) = getProduct(assetId);
 		require(_owner == address(0), "error_alreadyExists");
 		assets[assetId] = Asset({id: assetId, tokenId: tokenId, contract: contract, numSales:numSales, royalties: royalties, owner: owner, creator: creator});
