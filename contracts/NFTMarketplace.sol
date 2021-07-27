@@ -1,5 +1,6 @@
 // solhint-disable not-rely-on-time
 pragma solidity ^0.6.6;
+pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -9,6 +10,8 @@ import "./Ownable.sol";
 
 
 interface IGIVEMarketplace{
+
+	function getAsset(bytes32 id) external view returns (uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address owner, address creator);
 	
 }
 
@@ -20,10 +23,10 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	using SafeMath for int256;
 
 	//events
-	event AssetImported(address indexed owner, bytes32 id, address indexed nftContract, uint256 indexed tokenId, string name, uint256 numSales, uint256 royalties, address creator);
-	event AssetCreated(address indexed creator, bytes32 id, string name, address indexed nftContract, uint256 indexed tokenId);
+	event AssetImported(address indexed owner, bytes32 id, address indexed nftContract, uint256 indexed tokenId, uint256 numSales, uint256 royalties, address creator);
+event AssetCreated(address indexed creator, address indexed nftContract, uint256 indexed tokenId, address owner);
 	event AssetOwnershipOffered(bytes32 id, address indexed owner, address indexed recipient);
-	event AssetOwnershipChanged(address indexed newOwner, assetId, address indexed owner);
+	event AssetOwnershipChanged(address indexed newOwner, bytes32 assetId, address indexed owner);
 	event AssetUpdated(uint256 indexed tokenId, address indexed nftContract, address indexed owner);
 
 	//Structures
@@ -36,7 +39,6 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 		address owner;
 		address creator;
 		address recipient;
-		mapping(address => Order) orders;
 	}
 
 	struct Order{
@@ -91,7 +93,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	}
 
 	modifier onlyAssetOwner(bytes32 assetId) {
-        (,,,,,address _owner,,) = getAsset(assetId);
+        (,,,,address _owner,) = getAsset(assetId);
         require(_owner != address(0), "error_notFound");
         require(_owner == msg.sender || owner == msg.sender, "error_assetOwnersOnly");
         _;
@@ -109,7 +111,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 		a.royalties = _royalties;
 		a.owner = _owner;
 		a.creator = _creator;
-		emit AssetImported(a.owner, a.id, a.nftContract, a.tokenId, a.name, a.numSales, a.royalties, a.creator);
+		emit AssetImported(a.owner, a.id, a.nftContract, a.tokenId, a.numSales, a.royalties, a.creator);
 		return true;
 	}
 
@@ -120,9 +122,9 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	function _createAsset(bytes32 assetId, uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address owner, address creator) internal {
 		require(tokenId != 0, "error_nullTokenId");
 		require(nftContract != address(0), "error_nullnftContract");
-		(,,,,,address _owner,,) = getAsset(assetId);
+		(,,,,address _owner,) = getAsset(assetId);
 		require(_owner == address(0), "error_alreadyExists");
-		assets[assetId] = Asset({id: assetId, tokenId: tokenId, nftContract: nftContract, numSales:numSales, royalties: royalties, owner: owner, creator: creator});
+		assets[assetId] = Asset({id: assetId, tokenId: tokenId, nftContract: nftContract, numSales:numSales, royalties: royalties, owner: owner, creator: creator, recipient: address(0)});
 		emit AssetCreated(creator, nftContract, tokenId, owner);
 	}
 
@@ -152,11 +154,11 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	function claimAsset(bytes32 assetId) public {
 		_importAssetIfNeeded(assetId);
         Asset storage a = assets[assetId];
-        require(msg.sender == a.newOwnerCandidate, "error_notPermitted");
+        require(msg.sender == a.recipient, "error_notPermitted");
         //Implement event
 		emit AssetOwnershipChanged(msg.sender, assetId, a.owner);
         a.owner = msg.sender;
-        a.newOwnerCandidate = address(0);
+        a.recipient = address(0);
 	}
 
 	//one step asset transfer method
@@ -164,21 +166,21 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 		_importAssetIfNeeded(assetId);
 		Asset storage a = assets[assetId];
         a.owner = recipient;
-        a.newOwnerCandidate = address(0);
+        a.recipient = address(0);
 	}
 
 	//Whitelist mangement, if necessary?  
 
 	// Order management
 
-	mapping (uint => Order) public sellOrder; //uint will be the tokenId. probably only going to have one sellOrder at a time?
-	mapping (uint => Order[]) public buyOrders; //array of Orders to represent buy orders on an asset
+	mapping (uint => Order) sellOrder; //uint will be the tokenId. probably only going to have one sellOrder at a time?
+	mapping (uint => Order[]) buyOrders; //array of Orders to represent buy orders on an asset
 
-	function getSellOrder(uint tokenId) public {
+	function getSellOrder(uint tokenId) public returns (Order memory _sellOrder){
 		return sellOrder[tokenId]; //returns a sell order of a specific asset
 	}
 
-	function getBuyOrders(uint tokenId) public {
+	function getBuyOrders(uint tokenId) public returns (Order[] memory _buyOrders){
 		return buyOrders[tokenId]; //returns array of buy orders on a specific asset
 	}
 
@@ -195,7 +197,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 
 	}
 
-	function createOrder(Asset asset, address fromAddress, address toAddress, uint orderType, uint subPrice) public {
+	function createOrder(Asset memory asset, address fromAddress, address toAddress, uint orderType, uint subPrice) public {
 		
 		if (orderType == 1){ //if sellOrder
 			sellOrder[asset.tokenId] = Order(asset, fromAddress, toAddress, orderType, subPrice, subPrice * 109 / 100);
@@ -206,7 +208,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 		
 	}
 
-	function cancelOrder(Order order, address toAddress) public {
+	function cancelOrder(Order memory order, address toAddress) public {
 
 		if (order.orderType == 1){
 			delete sellOrder[order.asset.tokenId];
