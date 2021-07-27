@@ -9,7 +9,7 @@ import "./Ownable.sol";
 
 
 interface IGIVEMarketplace{
-	
+	function getAsset(bytes32 id) public view returns (uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address owner, address creator);
 }
 
 /*
@@ -60,7 +60,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 
 	mapping (bytes32 => Asset) public assets;
 
-	function getAsset(bytes32 id) public override view returns (uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address owner, address creator) {
+	function getAsset(bytes32 id) public view returns (uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address owner, address creator) {
 		(tokenId, nftContract, numSales, royalties, owner, creator) = _getAssetLocal(id);
 		if (owner != address(0))
 			return (tokenId, nftContract, numSales, royalties, owner, creator);
