@@ -11,3 +11,7 @@ coverage
 .vs/ProjectSettings.json
 .vs/VSWorkspaceState.json
 .vs/marketplace-contracts/v16/.suo
+.vscode/settings.json
+.vscode/settings.json
+package-lock.json
+.vscode/launch.json
