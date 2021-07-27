@@ -72,7 +72,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 		if (owner != address(0))
 			return (tokenId, nftContract, numSales, royalties, owner, creator);
 		(tokenId, nftContract, numSales, royalties, owner, creator) = prev_marketplace.getAsset(id);
-		return (token_id, nftContract, numSales, royalties, owner, creator);
+		return (tokenId, nftContract, numSales, royalties, owner, creator);
 	}
 
 	function _getAssetLocal(bytes32 id) internal view returns (uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address owner, address creator) {
