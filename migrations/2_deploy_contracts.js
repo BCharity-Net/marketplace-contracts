@@ -12,5 +12,5 @@ module.exports = async (deployer, network) => {
     // await deployer.deploy(Marketplace, datacoinAddress, streamrUpdaterAddress, marketplaceAddress, { gas: 6700000 })
     // await deployer.deploy(Community, Marketplace.deployed().address, { gas: 6000000 })
     await deployer.deploy(NFTMarketplace, datacoinAddress, NFTAddress, marketplaceAddress, {gas: 6700000})
-    Marketplace.deployed().then(m => m.transferOwnership(ownerAddress, { gas: 400000 }))
+    NFTMarketplace.deployed().then(m => m.transferOwnership(ownerAddress, { gas: 400000 }))
 }
