@@ -1,12 +1,13 @@
 // solhint-disable not-rely-on-time
-pragma solidity ^0.6.6;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/access/Ownable.sol";
 
 import "./PurchaseListener.sol";
-import "./Ownable.sol";
+//import "./Ownable.sol";
 import "./giveNFT/giveNFTv2.sol";
 import "./giveNFT/giveNFTv2Factory.sol";
 
@@ -38,7 +39,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 		address nftContract;
 		uint256 numSales;
 		uint256 royalties;
-		address owner;
+		address assetOwner;
 		address creator;
 		address recipient;
 	}
@@ -63,77 +64,77 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	IGIVEMarketplace public prev_marketplace;
 	uint256 public txFee;
 
-	constructor(address paymentTokenAddress, address nonFungibleTokenAddress, address prevMarketplaceAddress) public Ownable() {
+	constructor(address paymentTokenAddress, address nonFungibleTokenAddress, address prevMarketplaceAddress) Ownable() {
 		_initialize(paymentTokenAddress, nonFungibleTokenAddress, prevMarketplaceAddress);
 	}
 
 	function _initialize(address paymentTokenAddress, address nonFungibleTokenAddress, address prevMarketplaceAddress) internal {
 		nonFungibleToken = giveNFTv2(nonFungibleTokenAddress);
 		paymentToken = ERC20(paymentTokenAddress);
-		prev_marketplace = prevMarketplaceAddress;
+		prev_marketplace = IGIVEMarketplace(prevMarketplaceAddress);
 	}
 
 	/// Asset management
 
 	mapping (bytes32 => Asset) public assets;
 
-	function getAsset(bytes32 id) public override view returns (uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address owner, address creator) {
-		(tokenId, nftContract, numSales, royalties, owner, creator) = _getAssetLocal(id);
-		if (owner != address(0))
-			return (tokenId, nftContract, numSales, royalties, owner, creator);
-		(tokenId, nftContract, numSales, royalties, owner, creator) = prev_marketplace.getAsset(id);
-		return (tokenId, nftContract, numSales, royalties, owner, creator);
+	function getAsset(bytes32 id) public override view returns (uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address assetOwner, address creator) {
+		(tokenId, nftContract, numSales, royalties, assetOwner, creator) = _getAssetLocal(id);
+		if (assetOwner != address(0))
+			return (tokenId, nftContract, numSales, royalties, assetOwner, creator);
+		(tokenId, nftContract, numSales, royalties, assetOwner, creator) = prev_marketplace.getAsset(id);
+		return (tokenId, nftContract, numSales, royalties, assetOwner, creator);
 	}
 
-	function _getAssetLocal(bytes32 id) internal view returns (uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address owner, address creator) {
+	function _getAssetLocal(bytes32 id) internal view returns (uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address assetOwner, address creator) {
 		Asset memory a = assets[id];
 		return (
 			a.tokenId, 
 			a.nftContract, 
 			a.numSales, 
 			a.royalties,
-			a.owner, 
+			a.assetOwner, 
 			a.creator
 		);
 	}
 
 	modifier onlyAssetOwner(bytes32 assetId) {
-        (,,,,address _owner,) = getAsset(assetId);
-        require(_owner != address(0), "error_notFound");
-        require(_owner == msg.sender || owner == msg.sender, "error_assetOwnersOnly");
+        (,,,,address _assetOwner,) = getAsset(assetId);
+        require(_assetOwner != address(0), "error_notFound");
+        require(_assetOwner == msg.sender || owner() == msg.sender, "error_assetOwnersOnly");
         _;
     }
 
 	function _importAssetIfNeeded(bytes32 assetId) internal returns(bool imported){
 		Asset storage a = assets[assetId];
 		if (a.id != 0x0) {return false;}
-		(uint256 _tokenId, address _nftContract, uint256 _numSales, uint256 _royalties, address _owner, address _creator) = prev_marketplace.getAsset(assetId);
-		if (_owner == address(0)) {return false;}
+		(uint256 _tokenId, address _nftContract, uint256 _numSales, uint256 _royalties, address _assetOwner, address _creator) = prev_marketplace.getAsset(assetId);
+		if (_assetOwner == address(0)) {return false;}
 		a.id = assetId;
 		a.tokenId = _tokenId; 
 		a.nftContract = _nftContract; 
 		a.numSales = _numSales; 
 		a.royalties = _royalties;
-		a.owner = _owner;
+		a.assetOwner = _assetOwner;
 		a.creator = _creator;
-		emit AssetImported(a.owner, a.id, a.nftContract, a.tokenId, a.numSales, a.royalties, a.creator);
+		emit AssetImported(a.assetOwner, a.id, a.nftContract, a.tokenId, a.numSales, a.royalties, a.creator);
 		return true;
 	}
 
-	function createAsset(bytes32 assetId, uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address owner, address creator) public {
-		_createAsset(assetId, tokenId, nftContract, numSales, royalties, owner, creator);
+	function createAsset(bytes32 assetId, uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address assetOwner, address creator) public {
+		_createAsset(assetId, tokenId, nftContract, numSales, royalties, assetOwner, creator);
 	}
 
-	function _createAsset(bytes32 assetId, uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address owner, address creator) internal {
+	function _createAsset(bytes32 assetId, uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address assetOwner, address creator) internal {
 		require(tokenId != 0, "error_nullTokenId");
 		require(nftContract != address(0), "error_nullnftContract");
-		(,,,,address _owner,) = getAsset(assetId);
-		require(_owner == address(0), "error_alreadyExists");
-		assets[assetId] = Asset({id: assetId, tokenId: tokenId, nftContract: nftContract, numSales:numSales, royalties: royalties, owner: owner, creator: creator, recipient: address(0)});
-		emit AssetCreated(creator, nftContract, tokenId, owner);
+		(,,,,address _assetOwner,) = getAsset(assetId);
+		require(_assetOwner == address(0), "error_alreadyExists");
+		assets[assetId] = Asset({id: assetId, tokenId: tokenId, nftContract: nftContract, numSales:numSales, royalties: royalties, assetOwner: assetOwner, creator: creator, recipient: address(0)});
+		emit AssetCreated(creator, nftContract, tokenId, assetOwner);
 	}
 
-	function updateAsset(bytes32 assetId, uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address owner, address creator) public onlyAssetOwner(assetId){
+	function updateAsset(bytes32 assetId, uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address assetOwner, address creator) public onlyAssetOwner(assetId){
 		_importAssetIfNeeded(assetId);
 		Asset storage a = assets[assetId];
 		a.id = assetId;
@@ -141,19 +142,19 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 		a.nftContract = nftContract; 
 		a.numSales = numSales; 
 		a.royalties =royalties;
-		a.owner = owner;
+		a.assetOwner = assetOwner;
 		a.creator = creator;
 		//finish filling out this field + implement event
-		emit AssetUpdated(a.tokenId, a.nftContract, a.owner);
+		emit AssetUpdated(a.tokenId, a.nftContract, a.assetOwner);
 	}
 
 	//two step asset transfer method
 	function offerAsset(bytes32 assetId, address recipient) public onlyAssetOwner(assetId){
 		_importAssetIfNeeded(assetId);
 		assets[assetId].recipient = recipient;
-		owner = assets[assetId].owner;
+		address assetOwner = assets[assetId].assetOwner;
 		//finish filling out this field + implement event
-		emit AssetOwnershipOffered(assetId, owner, recipient);
+		emit AssetOwnershipOffered(assetId, assetOwner, recipient);
 	}
 
 	function claimAsset(bytes32 assetId) public {
@@ -161,8 +162,8 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
         Asset storage a = assets[assetId];
         require(msg.sender == a.recipient, "error_notPermitted");
         //Implement event
-		emit AssetOwnershipChanged(msg.sender, assetId, a.owner);
-        a.owner = msg.sender;
+		emit AssetOwnershipChanged(msg.sender, assetId, a.assetOwner);
+        a.assetOwner = msg.sender;
         a.recipient = address(0);
 	}
 
@@ -170,7 +171,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	function transferAsset(bytes32 assetId, address recipient) public onlyAssetOwner(assetId){
 		_importAssetIfNeeded(assetId);
 		Asset storage a = assets[assetId];
-        a.owner = recipient;
+        a.assetOwner = recipient;
         a.recipient = address(0);
 	}
 
