@@ -1,8 +1,8 @@
-pragma solidity ^0.6.6;
+pragma solidity ^0.8.0;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol"; 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
 
 contract IMarketplace {
     enum ProductState {
