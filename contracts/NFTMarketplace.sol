@@ -7,6 +7,8 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import "./PurchaseListener.sol";
 import "./Ownable.sol";
+import "./giveNFT/giveNFTv2.sol";
+import "./giveNFT/giveNFTv2Factory.sol";
 
 
 interface IGIVEMarketplace{
@@ -24,7 +26,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 
 	//events
 	event AssetImported(address indexed owner, bytes32 id, address indexed nftContract, uint256 indexed tokenId, uint256 numSales, uint256 royalties, address creator);
-event AssetCreated(address indexed creator, address indexed nftContract, uint256 indexed tokenId, address owner);
+	event AssetCreated(address indexed creator, address indexed nftContract, uint256 indexed tokenId, address owner);
 	event AssetOwnershipOffered(bytes32 id, address indexed owner, address indexed recipient);
 	event AssetOwnershipChanged(address indexed newOwner, bytes32 assetId, address indexed owner);
 	event AssetUpdated(uint256 indexed tokenId, address indexed nftContract, address indexed owner);
@@ -52,20 +54,23 @@ event AssetCreated(address indexed creator, address indexed nftContract, uint256
 		
 		//expirationTime?
 		//auctions?
-
 	}
 
 	// Marketplace Lifecycle
 
 	ERC20 public paymentToken;
-	IGIVEMarketplace prev_marketplace;
+	giveNFTv2 public nonFungibleToken;
+	IGIVEMarketplace public prev_marketplace;
+	uint256 public txFee;
 
-	constructor() Ownable() public{
-		
+	constructor(address paymentTokenAddress, address nonFungibleTokenAddress, address prevMarketplaceAddress) public Ownable() {
+		_initialize(paymentTokenAddress, nonFungibleTokenAddress, prevMarketplaceAddress);
 	}
 
-	function _initialize() internal {
-	
+	function _initialize(address paymentTokenAddress, address nonFungibleTokenAddress, address prevMarketplaceAddress) internal {
+		nonFungibleToken = giveNFTv2(nonFungibleTokenAddress);
+		paymentToken = ERC20(paymentTokenAddress);
+		prev_marketplace = prevMarketplaceAddress;
 	}
 
 	/// Asset management
