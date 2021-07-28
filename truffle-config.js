@@ -13,7 +13,7 @@ module.exports = {
 		  network_id: "*",       // Any network (default: none)
 		},
 		mumbai: {
-		  provider: () => new HDWalletProvider(MNEMONIC, `https://rpc-mumbai.matic.today`),
+		  provider: () => new HDWalletProvider(MNEMONIC, `https://polygon-mumbai.infura.io/v3/29b072a9431e43af95316d641b4f50d4`),
 		  network_id: 80001,
 		  confirmations: 2,
 		  timeoutBlocks: 200,

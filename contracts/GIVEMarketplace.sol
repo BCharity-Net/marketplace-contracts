@@ -1,4 +1,4 @@
-// solhint-disable not-rely-on-time
+// solhint-disable not-rely-on-time, var-name-mixedcase
 pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
