@@ -31,6 +31,11 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	event AssetOwnershipOffered(bytes32 id, address indexed owner, address indexed recipient);
 	event AssetOwnershipChanged(address indexed newOwner, bytes32 assetId, address indexed owner);
 	event AssetUpdated(uint256 indexed tokenId, address indexed nftContract, address indexed owner);
+	event EnteredFunction();
+	event InitialChecks();
+	event GotAsset();
+	event AssigningAsset();
+
 
 	//Structures
 	struct Asset{
@@ -126,10 +131,14 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	}
 
 	function _createAsset(bytes32 assetId, uint256 tokenId, address nftContract, uint256 numSales, uint256 royalties, address assetOwner, address creator) internal {
+		emit EnteredFunction();
 		require(tokenId != 0, "error_nullTokenId");
 		require(nftContract != address(0), "error_nullnftContract");
+		emit InitialChecks();
 		(,,,,address _assetOwner,) = getAsset(assetId);
+		emit GotAsset();
 		require(_assetOwner == address(0), "error_alreadyExists");
+		emit AssigningAsset();
 		assets[assetId] = Asset({id: assetId, tokenId: tokenId, nftContract: nftContract, numSales:numSales, royalties: royalties, assetOwner: assetOwner, creator: creator, recipient: address(0)});
 		emit AssetCreated(creator, nftContract, tokenId, assetOwner);
 	}
