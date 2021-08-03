@@ -1,7 +1,7 @@
 {
   "name": "marketplace-contracts",
   "version": "1.0.0",
-  "description": "Smart contracts for Streamr Marketplace",
+  "description": "Smart contracts for BCharity NFT Marketplace",
   "scripts": {
     "clean": "rm -rf build/ && mkdir -p build/contracts",
     "build": "truffle compile && ./flatten",
