@@ -14,6 +14,7 @@ const NFTMarketplaceContract = new web3.eth.Contract(contract.abi, contractAddre
 async function createNFT(assetId, tokenId, nftContract, numSales, royalties, assetOwner, creator) {
     const nonce = await web3.eth.getTransactionCount(PUBLIC_KEY, 'latest'); // get latest nonce
     //const gasEstimate = await NFTMarketplaceContract.methods.createAsset(assetId, tokenId, nftContract, numSales, royalties, assetOwner, creator).estimateGas(); // estimate gas
+    //GIVEMarketplace.deployed().then(createAsset(assetId, tokenId, nftContract, numSales, royalties, assetOwner, creator){return instance.set(4);});
 
     // Create the transaction
     const tx = {

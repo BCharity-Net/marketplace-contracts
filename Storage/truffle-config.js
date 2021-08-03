@@ -1,7 +1,6 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const fs = require('fs');
-//const MNEMONIC = process.env.MNEMONIC;
-const MNEMONIC = "stone amateur entire forum turtle sniff core among soccer glimpse lava napkin";
+const MNEMONIC = process.env.MNEMONIC;
 
 module.exports = {
 	// See <http://truffleframework.com/docs/advanced/configuration>
@@ -34,7 +33,7 @@ module.exports = {
 			version: "0.8.6",
 			settings: {
 				optimizer: {
-					enabled: false,
+					enabled: true,
 					runs: 200
 				},
 				evmVersion: "istanbul" 
