@@ -67,6 +67,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	ERC20 public paymentToken;
 	giveNFTv2 public nonFungibleToken;
 	IGIVEMarketplace public prev_marketplace;
+	address private addressCheck;
 	uint256 public txFee;
 
 	constructor(address paymentTokenAddress, address nonFungibleTokenAddress, address prevMarketplaceAddress) Ownable() {
@@ -77,6 +78,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 		nonFungibleToken = giveNFTv2(nonFungibleTokenAddress);
 		paymentToken = ERC20(paymentTokenAddress);
 		prev_marketplace = IGIVEMarketplace(prevMarketplaceAddress);
+		addressCheck = prevMarketplaceAddress;
 	}
 
 	/// Asset management
@@ -87,6 +89,8 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 		(tokenId, nftContract, numSales, royalties, assetOwner, creator) = _getAssetLocal(id);
 		if (assetOwner != address(0))
 			return (tokenId, nftContract, numSales, royalties, assetOwner, creator);
+		if (addressCheck == address(0))
+		    return (tokenId, nftContract, numSales, royalties, assetOwner, creator);
 		(tokenId, nftContract, numSales, royalties, assetOwner, creator) = prev_marketplace.getAsset(id);
 		return (tokenId, nftContract, numSales, royalties, assetOwner, creator);
 	}
