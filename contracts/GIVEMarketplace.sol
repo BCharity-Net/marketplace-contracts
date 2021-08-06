@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 // solhint-disable not-rely-on-time, var-name-mixedcase
 pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
@@ -192,31 +193,46 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 
 	// Order management
 
-	mapping (uint => Order) sellOrder; //uint will be the tokenId. probably only going to have one sellOrder at a time?
-	mapping (uint => Order[]) buyOrders; //array of Orders to represent buy orders on an asset
+	mapping (uint256 => Order) sellOrder; //uint will be the tokenId. probably only going to have one sellOrder at a time?
+	mapping (uint256 => Order[]) buyOrders; //array of Orders to represent buy orders on an asset
 
-	function getSellOrder(uint tokenId) public returns (Order memory _sellOrder){
+	function getSellOrder(uint tokenId) public view returns (Order memory _sellOrder){
 		return sellOrder[tokenId]; //returns a sell order of a specific asset
 	}
 
-	function getBuyOrders(uint tokenId) public returns (Order[] memory _buyOrders){
+	function getBuyOrders(uint tokenId) public view returns (Order[] memory _buyOrders){
 		return buyOrders[tokenId]; //returns array of buy orders on a specific asset
 	}
 
-	function getBuyOrder(uint tokenId, address toAddress) public { //retrieves a buy order that you made
-
-
+	function getBuyOrder(uint tokenId, address toAddress) public view returns (Asset memory asset, address fromAddress, address toAddressOut, uint256 orderType, uint256 subPrice, uint256 price) { //retrieves a buy order that you made
+        Order memory orderOut;
+        for (uint256 i = 0; i < buyOrders[tokenId].length; i++){
+            if(buyOrders[tokenId][i].toAddress == toAddress){
+                orderOut = buyOrders[tokenId][i];
+            }
+        }
+        
+        return(
+            orderOut.asset,
+            orderOut.fromAddress,
+            orderOut.toAddress,
+            orderOut.orderType,
+            orderOut.subPrice,
+            orderOut.price
+        );
+        
 	}
 
 	function getOrderLocal() public { //what is a local order?
-	
+	    
 	}
 
 	function _importOrderIfNeeded() internal {
-
+        
 	}
 
-	function createOrder(Asset memory asset, address fromAddress, address toAddress, uint orderType, uint subPrice) public {
+	function createOrder(bytes32 assetId, address fromAddress, address toAddress, uint orderType, uint subPrice) public {
+		Asset memory asset = assets[assetId];
 		
 		if (orderType == 1){ //if sellOrder
 			sellOrder[asset.tokenId] = Order(asset, fromAddress, toAddress, orderType, subPrice, subPrice * 109 / 100);

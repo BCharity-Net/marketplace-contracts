@@ -429,51 +429,9 @@
 			{
 				"inputs": [
 					{
-						"components": [
-							{
-								"internalType": "bytes32",
-								"name": "id",
-								"type": "bytes32"
-							},
-							{
-								"internalType": "uint256",
-								"name": "tokenId",
-								"type": "uint256"
-							},
-							{
-								"internalType": "address",
-								"name": "nftContract",
-								"type": "address"
-							},
-							{
-								"internalType": "uint256",
-								"name": "numSales",
-								"type": "uint256"
-							},
-							{
-								"internalType": "uint256",
-								"name": "royalties",
-								"type": "uint256"
-							},
-							{
-								"internalType": "address",
-								"name": "assetOwner",
-								"type": "address"
-							},
-							{
-								"internalType": "address",
-								"name": "creator",
-								"type": "address"
-							},
-							{
-								"internalType": "address",
-								"name": "recipient",
-								"type": "address"
-							}
-						],
-						"internalType": "struct GIVEMarketplace.Asset",
-						"name": "asset",
-						"type": "tuple"
+						"internalType": "bytes32",
+						"name": "assetId",
+						"type": "bytes32"
 					},
 					{
 						"internalType": "address",
@@ -566,8 +524,81 @@
 					}
 				],
 				"name": "getBuyOrder",
-				"outputs": [],
-				"stateMutability": "nonpayable",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "bytes32",
+								"name": "id",
+								"type": "bytes32"
+							},
+							{
+								"internalType": "uint256",
+								"name": "tokenId",
+								"type": "uint256"
+							},
+							{
+								"internalType": "address",
+								"name": "nftContract",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "numSales",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "royalties",
+								"type": "uint256"
+							},
+							{
+								"internalType": "address",
+								"name": "assetOwner",
+								"type": "address"
+							},
+							{
+								"internalType": "address",
+								"name": "creator",
+								"type": "address"
+							},
+							{
+								"internalType": "address",
+								"name": "recipient",
+								"type": "address"
+							}
+						],
+						"internalType": "struct GIVEMarketplace.Asset",
+						"name": "asset",
+						"type": "tuple"
+					},
+					{
+						"internalType": "address",
+						"name": "fromAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "toAddressOut",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "orderType",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subPrice",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "price",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -660,7 +691,7 @@
 						"type": "tuple[]"
 					}
 				],
-				"stateMutability": "nonpayable",
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -760,7 +791,7 @@
 						"type": "tuple"
 					}
 				],
-				"stateMutability": "nonpayable",
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -970,17 +1001,19 @@
 	},
 	"sources": {
 		"contracts/GIVEMarketplace.sol": {
-			"keccak256": "0x0d518506669263ab71731bd9fafdea40874309e70c555c3cab68a6e8f754c7fb",
+			"keccak256": "0xcab09f25b7e30eb1288c47f800b4b97f5af6e89c7154d9a9ad63ef272274efee",
+			"license": "AGPL-3.0-only",
 			"urls": [
-				"bzz-raw://f4f531abaae754a75c0c47a817dfb1efc0d45a28f118c0d04f040051309aacb0",
-				"dweb:/ipfs/QmS6peV73R6ZV4wGYPgZLAAXUv79hPkPXNwNC25BEgLHeL"
+				"bzz-raw://437456807e0832d70c536d163bf7b311437325845e89156c77eea695bb9e6ad1",
+				"dweb:/ipfs/QmTDxKgYN4VNavvrdGBUoKPiUrWx7648XZspn6ySPS4oAY"
 			]
 		},
 		"contracts/PurchaseListener.sol": {
-			"keccak256": "0x0f98576ff1ed9f113e95cc0c7628b98dd4b86a000506dd192c0a2f34017141c0",
+			"keccak256": "0x9a2db3d87ab429ccf91c780413ed9191ed23623107196c83b0b153eae8c5db4c",
+			"license": "AGPL-3.0-only",
 			"urls": [
-				"bzz-raw://db9459930a90e4c2f1698ec87fc2fcddf388cafeb9fe3d95097a4992f535ebe9",
-				"dweb:/ipfs/Qme9KuifguPGHFynpEGgL339jKkTZWSV6ooTMwJTN2gDi7"
+				"bzz-raw://03ca7cd3edbcf9903dcf301971fb6483c7f0d37d32fe1ac12437d73170cc87fb",
+				"dweb:/ipfs/QmdaABHx3CGjxYa7K2yKAZQtyBdjxSQAgeGkndSMwXpv5m"
 			]
 		},
 		"contracts/giveNFT/ERC721Tradable.sol": {

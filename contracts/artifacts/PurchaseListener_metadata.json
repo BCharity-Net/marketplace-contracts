@@ -1,0 +1,89 @@
+{
+	"compiler": {
+		"version": "0.8.4+commit.c7e474f2"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "productId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "address",
+						"name": "subscriber",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "endTimestamp",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "priceDatacoin",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "feeDatacoin",
+						"type": "uint256"
+					}
+				],
+				"name": "onPurchase",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "accepted",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"onPurchase(bytes32,address,uint256,uint256,uint256)": {
+					"notice": "Similarly to ETH transfer, returning false will decline the transaction   (declining should probably cause revert, but that's up to the caller) IMPORTANT: include onlyMarketplace modifier to your implementations!"
+				}
+			},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/PurchaseListener.sol": "PurchaseListener"
+		},
+		"evmVersion": "istanbul",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/PurchaseListener.sol": {
+			"keccak256": "0x9a2db3d87ab429ccf91c780413ed9191ed23623107196c83b0b153eae8c5db4c",
+			"license": "AGPL-3.0-only",
+			"urls": [
+				"bzz-raw://03ca7cd3edbcf9903dcf301971fb6483c7f0d37d32fe1ac12437d73170cc87fb",
+				"dweb:/ipfs/QmdaABHx3CGjxYa7K2yKAZQtyBdjxSQAgeGkndSMwXpv5m"
+			]
+		}
+	},
+	"version": 1
+}
