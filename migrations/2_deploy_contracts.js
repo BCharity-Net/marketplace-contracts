@@ -12,6 +12,6 @@ module.exports = async (deployer, network) => {
     const marketplaceAddress = mainnet ? "0x0000000000000000000000000000000000000000": "0x0000000000000000000000000000000000000000"
     // await deployer.deploy(Marketplace, datacoinAddress, streamrUpdaterAddress, marketplaceAddress, { gas: 6700000 })
     // await deployer.deploy(Community, Marketplace.deployed().address, { gas: 6000000 })
-    await deployer.deploy(GIVEMarketplace, datacoinAddress, NFTAddress, marketplaceAddress, {gas: 6700000})
+    await deployer.deploy(GIVEMarketplace, datacoinAddress, marketplaceAddress, {gas: 6700000})
     GIVEMarketplace.deployed().then(m => m.transferOwnership(ownerAddress, { gas: 400000 }))
 }

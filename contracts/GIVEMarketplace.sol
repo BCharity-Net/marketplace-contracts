@@ -58,6 +58,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 		uint orderType; // 1 for sellOrder or 2 for buyOrder
 		uint subPrice; //likely in units of finney (0.001 ETH)
 		uint price; //subPrice + 9% royalties
+		bool isComplete; //indicates if the order has been fulfilled.  
 		
 		//expirationTime?
 		//auctions?
@@ -66,17 +67,15 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	// Marketplace Lifecycle
 
 	ERC20 public paymentToken;
-	giveNFTv2 public nonFungibleToken;
 	IGIVEMarketplace public prev_marketplace;
 	address private addressCheck;
 	uint256 public txFee;
 
-	constructor(address paymentTokenAddress, address nonFungibleTokenAddress, address prevMarketplaceAddress) Ownable() {
-		_initialize(paymentTokenAddress, nonFungibleTokenAddress, prevMarketplaceAddress);
+	constructor(address paymentTokenAddress, address prevMarketplaceAddress) Ownable() {
+		_initialize(paymentTokenAddress, prevMarketplaceAddress);
 	}
 
-	function _initialize(address paymentTokenAddress, address nonFungibleTokenAddress, address prevMarketplaceAddress) internal {
-		nonFungibleToken = giveNFTv2(nonFungibleTokenAddress);
+	function _initialize(address paymentTokenAddress, address prevMarketplaceAddress) internal {
 		paymentToken = ERC20(paymentTokenAddress);
 		prev_marketplace = IGIVEMarketplace(prevMarketplaceAddress);
 		addressCheck = prevMarketplaceAddress;
@@ -227,18 +226,22 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 	    
 	}
 
-	function _importOrderIfNeeded() internal {
+	function _importBuyOrderIfNeeded() internal {
         
+	}
+	
+	function _importSellOrderIfNeeded() internal {
+	    
 	}
 
 	function createOrder(bytes32 assetId, address fromAddress, address toAddress, uint orderType, uint subPrice) public {
 		Asset memory asset = assets[assetId];
 		
 		if (orderType == 1){ //if sellOrder
-			sellOrder[asset.tokenId] = Order(asset, fromAddress, toAddress, orderType, subPrice, subPrice * 109 / 100);
+			sellOrder[asset.tokenId] = Order(asset, fromAddress, toAddress, orderType, subPrice, subPrice * 109 / 100, false);
 		}
 		else if (orderType == 2){ //if buyOrder
-			buyOrders[asset.tokenId].push(Order(asset, fromAddress, toAddress, orderType, subPrice, subPrice * 109 / 100));
+			buyOrders[asset.tokenId].push(Order(asset, fromAddress, toAddress, orderType, subPrice, subPrice * 109 / 100, false));
 		}
 		
 	}
@@ -257,15 +260,23 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 					delete buyOrders[order.asset.tokenId][i].toAddress;
 
 				}
-
 			}
-
 		}
 		//TODO delete leaves empty spot; move last element into empty spot.
 	}
 
-	function fulfillOrder() public {
+	function fulfillOrder(Order memory order1) public {
+	    
+	    //implement actual contract transfers + payment here
+	    
+	    bytes32 assetIndex = order1.asset.id;
+	    transferAsset(assetIndex, msg.sender);
+	    
+	    order1.isComplete = true;
+	}
 	
+	function matchOrder(Order memory order1, Order memory order2) internal {
+	    
 	}
 	
 }

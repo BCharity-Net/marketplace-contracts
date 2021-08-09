@@ -14,11 +14,6 @@
 					},
 					{
 						"internalType": "address",
-						"name": "nonFungibleTokenAddress",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
 						"name": "prevMarketplaceAddress",
 						"type": "address"
 					}
@@ -353,6 +348,11 @@
 								"internalType": "uint256",
 								"name": "price",
 								"type": "uint256"
+							},
+							{
+								"internalType": "bool",
+								"name": "isComplete",
+								"type": "bool"
 							}
 						],
 						"internalType": "struct GIVEMarketplace.Order",
@@ -460,7 +460,92 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
+				"inputs": [
+					{
+						"components": [
+							{
+								"components": [
+									{
+										"internalType": "bytes32",
+										"name": "id",
+										"type": "bytes32"
+									},
+									{
+										"internalType": "uint256",
+										"name": "tokenId",
+										"type": "uint256"
+									},
+									{
+										"internalType": "address",
+										"name": "nftContract",
+										"type": "address"
+									},
+									{
+										"internalType": "uint256",
+										"name": "numSales",
+										"type": "uint256"
+									},
+									{
+										"internalType": "uint256",
+										"name": "royalties",
+										"type": "uint256"
+									},
+									{
+										"internalType": "address",
+										"name": "assetOwner",
+										"type": "address"
+									},
+									{
+										"internalType": "address",
+										"name": "creator",
+										"type": "address"
+									},
+									{
+										"internalType": "address",
+										"name": "recipient",
+										"type": "address"
+									}
+								],
+								"internalType": "struct GIVEMarketplace.Asset",
+								"name": "asset",
+								"type": "tuple"
+							},
+							{
+								"internalType": "address",
+								"name": "fromAddress",
+								"type": "address"
+							},
+							{
+								"internalType": "address",
+								"name": "toAddress",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "orderType",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "subPrice",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "price",
+								"type": "uint256"
+							},
+							{
+								"internalType": "bool",
+								"name": "isComplete",
+								"type": "bool"
+							}
+						],
+						"internalType": "struct GIVEMarketplace.Order",
+						"name": "order1",
+						"type": "tuple"
+					}
+				],
 				"name": "fulfillOrder",
 				"outputs": [],
 				"stateMutability": "nonpayable",
@@ -684,6 +769,11 @@
 								"internalType": "uint256",
 								"name": "price",
 								"type": "uint256"
+							},
+							{
+								"internalType": "bool",
+								"name": "isComplete",
+								"type": "bool"
 							}
 						],
 						"internalType": "struct GIVEMarketplace.Order[]",
@@ -784,24 +874,16 @@
 								"internalType": "uint256",
 								"name": "price",
 								"type": "uint256"
+							},
+							{
+								"internalType": "bool",
+								"name": "isComplete",
+								"type": "bool"
 							}
 						],
 						"internalType": "struct GIVEMarketplace.Order",
 						"name": "_sellOrder",
 						"type": "tuple"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "nonFungibleToken",
-				"outputs": [
-					{
-						"internalType": "contract giveNFTv2",
-						"name": "",
-						"type": "address"
 					}
 				],
 				"stateMutability": "view",
@@ -1001,11 +1083,11 @@
 	},
 	"sources": {
 		"contracts/GIVEMarketplace.sol": {
-			"keccak256": "0xcab09f25b7e30eb1288c47f800b4b97f5af6e89c7154d9a9ad63ef272274efee",
+			"keccak256": "0x682d36e9b8df10520189b270f5345beeea0a0c5d47232cdb381c2e1b47eca782",
 			"license": "AGPL-3.0-only",
 			"urls": [
-				"bzz-raw://437456807e0832d70c536d163bf7b311437325845e89156c77eea695bb9e6ad1",
-				"dweb:/ipfs/QmTDxKgYN4VNavvrdGBUoKPiUrWx7648XZspn6ySPS4oAY"
+				"bzz-raw://5a5a768111c2f925b484b62bc9dfe39c80ac94fca96962047d7779e6a7086199",
+				"dweb:/ipfs/QmamCayxtgxHLjT1gDph6eMyjAWKyZjzyZxLa8V1E6Uoz7"
 			]
 		},
 		"contracts/PurchaseListener.sol": {
