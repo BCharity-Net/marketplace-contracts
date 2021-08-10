@@ -1,7 +1,7 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const fs = require('fs');
-//const MNEMONIC = process.env.MNEMONIC;
-const MNEMONIC = "stone amateur entire forum turtle sniff core among soccer glimpse lava napkin";
+const MNEMONIC = process.env.MNEMONIC;
+//const MNEMONIC = "stone amateur entire forum turtle sniff core among soccer glimpse lava napkin";
 
 module.exports = {
 	// See <http://truffleframework.com/docs/advanced/configuration>
@@ -14,8 +14,8 @@ module.exports = {
 		  network_id: "*",       // Any network (default: none)
 		},
 		mumbai: {
-		  //provider: () => new HDWalletProvider(MNEMONIC, `https://polygon-mumbai.g.alchemy.com/v2/Nfq9kasfoYe8wbUKeAgXDPTi1VAROBZA`),
-		  provider: () => new HDWalletProvider(MNEMONIC, `https://polygon-mumbai.infura.io/v3/29b072a9431e43af95316d641b4f50d4`),
+		  provider: () => new HDWalletProvider(MNEMONIC, `https://polygon-mumbai.g.alchemy.com/v2/Nfq9kasfoYe8wbUKeAgXDPTi1VAROBZA`),
+		  //provider: () => new HDWalletProvider(MNEMONIC, `https://polygon-mumbai.infura.io/v3/29b072a9431e43af95316d641b4f50d4`),
 		  network_id: 80001,
 		  confirmations: 2,
 		  //networkCheckTimeout: 10000000,
