@@ -68,6 +68,7 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 
 	ERC20 public paymentToken;
 	IGIVEMarketplace public prev_marketplace;
+	giveNFTv2 public nft;
 	address private addressCheck;
 	uint256 public txFee;
 
@@ -182,10 +183,20 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 
 	//one step asset transfer method
 	function transferAsset(bytes32 assetId, address recipient) public onlyAssetOwner(assetId){
+		
 		_importAssetIfNeeded(assetId);
 		Asset storage a = assets[assetId];
+		
+		//Transfers the actual NFT asset
+        address contractAddress = a.nftContract;
+	    nft = giveNFTv2(contractAddress);
+	    nft.safeTransferFrom(a.assetOwner, recipient, a.tokenId);
+	    
+	    //Updates the orderbooks
         a.assetOwner = recipient;
         a.recipient = address(0);
+        
+        
 	}
 
 	//Whitelist mangement, if necessary?  
@@ -240,10 +251,10 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 		if (orderType == 1){ //if sellOrder
 			sellOrder[asset.tokenId] = Order(asset, fromAddress, toAddress, orderType, subPrice, subPrice * 109 / 100, false);
 		}
+		
 		else if (orderType == 2){ //if buyOrder
 			buyOrders[asset.tokenId].push(Order(asset, fromAddress, toAddress, orderType, subPrice, subPrice * 109 / 100, false));
 		}
-		
 	}
 
 	function cancelOrder(Order memory order, address toAddress) public {
@@ -267,16 +278,29 @@ contract GIVEMarketplace is Ownable, IGIVEMarketplace {
 
 	function fulfillOrder(Order memory order1) public {
 	    
-	    //implement actual contract transfers + payment here
-	    
+	    //Acquire asset information
 	    bytes32 assetIndex = order1.asset.id;
+	    
+	    //Check if NFT is owned by owner still
+	    Asset memory asset = assets[assetIndex];
+	    address contractAddress = asset.nftContract;
+	    nft = giveNFTv2(contractAddress);
+	    require(order1.fromAddress == nft.ownerOf(asset.tokenId));
+	    
+	    //implement actual contract transfers + payment here
+	    require(paymentToken.transferFrom(order1.toAddress, order1.fromAddress, order1.price), "error_paymentFailed");
+	    
+	    //Transfers the NFT
 	    transferAsset(assetIndex, msg.sender);
 	    
+	    //Updates the orderbook
 	    order1.isComplete = true;
 	}
 	
 	function matchOrder(Order memory order1, Order memory order2) internal {
-	    
+	    order1.toAddress = order2.toAddress;
+	    order1.subPrice = order2.subPrice;
+	    order1.price = order2.price;
+	    fulfillOrder(order1);
 	}
-	
 }

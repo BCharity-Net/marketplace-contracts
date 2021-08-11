@@ -78,11 +78,11 @@
 	},
 	"sources": {
 		"contracts/GIVEMarketplace.sol": {
-			"keccak256": "0x682d36e9b8df10520189b270f5345beeea0a0c5d47232cdb381c2e1b47eca782",
+			"keccak256": "0x09d799c5eab52d37b0f9cde3a7a4b5adb055f678c9b78170004e51d1dfa8ec2b",
 			"license": "AGPL-3.0-only",
 			"urls": [
-				"bzz-raw://5a5a768111c2f925b484b62bc9dfe39c80ac94fca96962047d7779e6a7086199",
-				"dweb:/ipfs/QmamCayxtgxHLjT1gDph6eMyjAWKyZjzyZxLa8V1E6Uoz7"
+				"bzz-raw://4b777249bee9233495b783b7a9b9c9c80c0d35e631232f472bb47ae1dcb55769",
+				"dweb:/ipfs/QmXwskTj1uJA8GLd2vpcQAMu9NPWhraKzFKm3N1yAWsjw1"
 			]
 		},
 		"contracts/PurchaseListener.sol": {
